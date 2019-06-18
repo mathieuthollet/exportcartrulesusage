@@ -41,7 +41,7 @@ Choose the file "exportcartrulesusage.zip" and click on "Upload this module".
 
 ## How to use
 
-In admin, choose "Modules and services", and then look for the module "Export cart rules usage".
+In admin, choose "Modules and services", and then look for the module "Export cart rules usage orders CSV".
  
 Click on the "Configure" button. 
 

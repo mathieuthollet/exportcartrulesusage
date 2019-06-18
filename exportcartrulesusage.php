@@ -43,11 +43,11 @@ class ExportCartRulesUsage extends Module
         $this->author = 'Mathieu Thollet';
         $this->need_instance = 0;
         $this->bootstrap = true;
-        //$this->module_key = '8bb6d644209bd1fb49a7943b661e8c38';
+        $this->module_key = '89665a4f0c4ab095d8f48e9e063750a2';
 
         parent::__construct();
 
-        $this->displayName = $this->l('Export cart rules usage');
+        $this->displayName = $this->l('Export cart rules usage orders CSV');
         $this->description = $this->l('Export CSV file of usage of cart rules in orders. Filter by cart rule, order status, date and country.');
     }
 
@@ -219,7 +219,7 @@ class ExportCartRulesUsage extends Module
 
 
     /**
-     * Export invoices
+     * Export data
      */
     protected function processExport()
     {
@@ -242,7 +242,7 @@ class ExportCartRulesUsage extends Module
             return;
         }
 
-        // Get invoices list
+        // Get data
         $sql = 'SELECT o.`reference` AS order_reference, o.`date_add` AS order_date, o.`id_shop`, o.`total_paid_tax_incl`, o.`total_paid_tax_excl`, o.`total_shipping_tax_incl`, o.`total_shipping_tax_excl`
                     , osl.`name` AS order_state
                     , oi.`id_order_invoice`, oi.`date_add` AS invoice_date
@@ -322,7 +322,7 @@ class ExportCartRulesUsage extends Module
         foreach ($order_list as $row) {
             $data = array();
             foreach ($fields as $field) {
-                switch($field) {
+                switch ($field) {
                     case 'invoice_number':
                         $invoice = new OrderInvoice($row['id_order_invoice'], $this->context->language->id);
                         $data[$field] = $invoice->getInvoiceNumberFormatted($this->context->language->id, $row['id_shop']);
@@ -341,6 +341,4 @@ class ExportCartRulesUsage extends Module
         header('Content-disposition: attachment; filename=cart-rules-usage.csv');
         die($csv);
     }
-
-
 }
