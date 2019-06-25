@@ -165,14 +165,14 @@ class ExportCartRulesUsage extends Module
                         'label' => $this->l('From'),
                         'name' => 'date_from',
                         'maxlength' => 10,
-                        'hint' => $this->l('Format: 2018-12-31 (inclusive).')
+                        'hint' => $this->l('Format: 2018-12-31 00:00:00 (inclusive).')
                     ),
                     array(
                         'type' => 'datetime',
                         'label' => $this->l('To'),
                         'name' => 'date_to',
                         'maxlength' => 10,
-                        'hint' => $this->l('Format: 2019-12-31 (inclusive).')
+                        'hint' => $this->l('Format: 2019-12-31 23:59:00 (inclusive).')
                     ),
                     array(
                         'type' => 'select',
