@@ -39,7 +39,7 @@ class ExportCartRulesUsage extends Module
     {
         $this->name = 'exportcartrulesusage';
         $this->tab = 'export';
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         $this->author = 'Mathieu Thollet';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -149,6 +149,7 @@ class ExportCartRulesUsage extends Module
                         'maxlength' => 10,
                         'required' => false,
                         'class' => 'fixed-width-xl',
+                        'hint' => $this->l('If you want to see all cart rules, leave "Cart Rule (ID)" and "Cart rule (code)" empty.'),
                     ),
                     array(
                         'type' => 'text',
@@ -157,20 +158,21 @@ class ExportCartRulesUsage extends Module
                         'maxlength' => 10,
                         'required' => false,
                         'class' => 'fixed-width-xl',
+                        'hint' => $this->l('If you want to see all cart rules, leave "Cart Rule (ID)" and "Cart rule (code)" empty.'),
                     ),
                     array(
                         'type' => 'datetime',
                         'label' => $this->l('From'),
                         'name' => 'date_from',
                         'maxlength' => 10,
-                        'hint' => $this->l('Format: 2011-12-31 (inclusive).')
+                        'hint' => $this->l('Format: 2018-12-31 (inclusive).')
                     ),
                     array(
                         'type' => 'datetime',
                         'label' => $this->l('To'),
                         'name' => 'date_to',
                         'maxlength' => 10,
-                        'hint' => $this->l('Format: 2012-12-31 (inclusive).')
+                        'hint' => $this->l('Format: 2019-12-31 (inclusive).')
                     ),
                     array(
                         'type' => 'select',
@@ -237,13 +239,10 @@ class ExportCartRulesUsage extends Module
                 $id_order_state[] = $order_state['id_order_state'];
             }
         }
-        if (!$id_cart_rule && !$code_cart_rule) {
-            $this->html = '<p class="alert alert-danger">' . $this->l('You must provide at least Cart Rule ID or Cart Rule Code') . '</p>';
-            return;
-        }
 
         // Get data
-        $sql = 'SELECT o.`reference` AS order_reference, o.`date_add` AS order_date, o.`id_shop`, o.`total_paid_tax_incl`, o.`total_paid_tax_excl`, o.`total_shipping_tax_incl`, o.`total_shipping_tax_excl`
+        $sql = 'SELECT ocr.`id_cart_rule`, ocr.`code` AS cart_rule_code, ocr.`description` AS cart_rule_description
+                    , o.`reference` AS order_reference, o.`date_add` AS order_date, o.`id_shop`, o.`total_paid_tax_incl`, o.`total_paid_tax_excl`, o.`total_shipping_tax_incl`, o.`total_shipping_tax_excl`
                     , osl.`name` AS order_state
                     , oi.`id_order_invoice`, oi.`date_add` AS invoice_date
                     , c.`email`
@@ -259,6 +258,14 @@ class ExportCartRulesUsage extends Module
 			LEFT JOIN `' . _DB_PREFIX_ . 'country_lang` ci ON (ci.`id_country` = ai.`id_country` AND ci.`id_lang` = ' . $this->context->language->id . ')
 			LEFT JOIN `' . _DB_PREFIX_ . 'address` ad ON (ad.`id_address` = o.`id_address_delivery`)
 			LEFT JOIN `' . _DB_PREFIX_ . 'country_lang` cd ON (cd.`id_country` = ad.`id_country` AND cd.`id_lang` = ' . $this->context->language->id . ')
+			INNER JOIN (
+				SELECT ocr.`id_order`, cr.`id_cart_rule`, cr.`code`, cr.`description`
+			        FROM `ps_order_cart_rule` ocr
+				INNER JOIN `ps_cart_rule` cr ON cr.id_cart_rule = ocr.id_cart_rule
+				WHERE 1=1 '
+				. ($id_cart_rule ? ' AND cr.id_cart_rule = ' . $id_cart_rule : '')
+                . ($code_cart_rule ? ' AND cr.code = \'' . pSQL($code_cart_rule) . '\'' : '')
+            . ') ocr ON ocr.`id_order` = o.`id_order`
 			WHERE 1=1 ';
         if ($date_to != '') {
             $sql .= ' AND o.date_add <= \'' . pSQL($date_to) . '\' ';
@@ -272,14 +279,6 @@ class ExportCartRulesUsage extends Module
         if (is_array($id_order_state) && count($id_order_state) > 0) {
             $sql .= ' AND o.current_state IN (' . implode(',', $id_order_state) . ') ';
         }
-        $sql .= ' AND o.id_order IN (
-            SELECT ocr.id_order
-            FROM `' . _DB_PREFIX_ . 'order_cart_rule` ocr
-            INNER JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cr.id_cart_rule = ocr.id_cart_rule
-            WHERE '
-                . ($id_cart_rule ? 'cr.id_cart_rule = ' . $id_cart_rule : '')
-                . ($code_cart_rule ? 'cr.code = \'' . pSQL($code_cart_rule) . '\'' : '')
-        . ')';
         $sql .= Shop::addSqlRestriction(Shop::SHARE_ORDER, 'o');
         $sql .= ' ORDER BY o.date_add ASC ';
         $order_list = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -290,49 +289,53 @@ class ExportCartRulesUsage extends Module
 
         // construct CSV
         $fields = array(
-            'order_reference',
-            'order_date',
-            'total_paid_tax_incl',
-            'total_paid_tax_excl',
-            'total_shipping_tax_incl',
-            'total_shipping_tax_excl',
-            'order_state',
-            'invoice_number',
-            'invoice_date',
-            'email',
-            'invoice_company',
-            'invoice_firstname',
-            'invoice_lastname',
-            'invoice_address1',
-            'invoice_address2',
-            'invoice_postcode',
-            'invoice_city',
-            'invoice_country',
-            'delivery_company',
-            'delivery_firstname',
-            'delivery_lastname',
-            'delivery_address1',
-            'delivery_address2',
-            'delivery_postcode',
-            'delivery_city',
-            'delivery_country',
+            'id_cart_rule' => $this->l('Cart rule ID'),
+            'cart_rule_code' => $this->l('Cart rule Code'),
+            'cart_rule_description' => $this->l('Cart rule description'),
+            'order_reference' => $this->l('Order reference'),
+            'order_date' => $this->l('Order date'),
+            'total_paid_tax_incl' => $this->l('Total paid tax incl'),
+            'total_paid_tax_excl' => $this->l('Total paid tax excl'),
+            'total_shipping_tax_incl' => $this->l('Total shipping tax incl'),
+            'total_shipping_tax_excl' => $this->l('Total shipping tax excl'),
+            'order_state' => $this->l('Order state'),
+            'invoice_number' => $this->l('Invoice number'),
+            'invoice_date' => $this->l('Invoice date'),
+            'email' => $this->l('Customer email'),
+            'invoice_company' => $this->l('Invoice Company'),
+            'invoice_firstname' => $this->l('Invoice firstname'),
+            'invoice_lastname' => $this->l('Invoice lastname'),
+            'invoice_address1' => $this->l('Invoice address 1'),
+            'invoice_address2' => $this->l('Invoice address 2'),
+            'invoice_postcode' => $this->l('Invoice postcode'),
+            'invoice_city' => $this->l('Invoice city'),
+            'invoice_country' => $this->l('Invoice country'),
+            'delivery_company' => $this->l('Delivery company'),
+            'delivery_firstname' => $this->l('Delivery firstname'),
+            'delivery_lastname' => $this->l('Delivery lastname'),
+            'delivery_address1' => $this->l('Delivery address 1'),
+            'delivery_address2' => $this->l('Delivery address 2'),
+            'delivery_postcode' => $this->l('Delivery postcode'),
+            'delivery_city' => $this->l('Delivery city'),
+            'delivery_country' => $this->l('Delivery country'),
         );
         $fh = fopen('php://temp', 'rw');
-        fputcsv($fh, $fields);
+        fprintf($fh, chr(0xEF).chr(0xBB).chr(0xBF));
+        fputcsv($fh, $fields, ';');
         foreach ($order_list as $row) {
             $data = array();
-            foreach ($fields as $field) {
-                switch ($field) {
+            foreach ($fields as $key => $field) {
+                switch ($key) {
                     case 'invoice_number':
                         $invoice = new OrderInvoice($row['id_order_invoice'], $this->context->language->id);
-                        $data[$field] = $invoice->getInvoiceNumberFormatted($this->context->language->id, $row['id_shop']);
+                        $data[$key] = $invoice->getInvoiceNumberFormatted($this->context->language->id, $row['id_shop']);
                         break;
                     default:
-                        $data[$field] = $row[$field];
+                        $data[$key] = $row[$key];
                         break;
                 }
             }
-            fputcsv($fh, $data);
+            fputcsv($fh, $data, ';');
         }
         rewind($fh);
         $csv = stream_get_contents($fh);
