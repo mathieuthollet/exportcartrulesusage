@@ -259,14 +259,14 @@ class ExportCartRulesUsage extends Module
 			LEFT JOIN `' . _DB_PREFIX_ . 'address` ad ON (ad.`id_address` = o.`id_address_delivery`)
 			LEFT JOIN `' . _DB_PREFIX_ . 'country_lang` cd ON (cd.`id_country` = ad.`id_country` AND cd.`id_lang` = ' . $this->context->language->id . ')
 			INNER JOIN (
-				SELECT ocr.`id_order`, cr.`id_cart_rule`, cr.`code`, cr.`description`
-			        FROM `ps_order_cart_rule` ocr
-				INNER JOIN `ps_cart_rule` cr ON cr.id_cart_rule = ocr.id_cart_rule
-				WHERE 1=1 '
-				. ($id_cart_rule ? ' AND cr.id_cart_rule = ' . $id_cart_rule : '')
+                SELECT ocr.`id_order`, cr.`id_cart_rule`, cr.`code`, cr.`description`
+	            FROM `' . _DB_PREFIX_ . 'order_cart_rule` ocr
+	            INNER JOIN `' . _DB_PREFIX_ . 'cart_rule` cr ON cr.id_cart_rule = ocr.id_cart_rule
+	            WHERE 1=1 '
+                . ($id_cart_rule ? ' AND cr.id_cart_rule = ' . $id_cart_rule : '')
                 . ($code_cart_rule ? ' AND cr.code = \'' . pSQL($code_cart_rule) . '\'' : '')
             . ') ocr ON ocr.`id_order` = o.`id_order`
-			WHERE 1=1 ';
+            WHERE 1=1 ';
         if ($date_to != '') {
             $sql .= ' AND o.date_add <= \'' . pSQL($date_to) . '\' ';
         }
