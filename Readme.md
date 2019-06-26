@@ -52,7 +52,7 @@ To export the CSV file, click on the "CSV Export" button.
 
 ## Support
 
-If you have any question or bug report, or suggestions to improve my module, contact me.
+If you have any question or bug report, or suggestions to improve my module, contact me : https://addons.prestashop.com/fr/contactez-nous?id_product=45701
 
 I will do my best to help you with your module.
 

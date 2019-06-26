@@ -33,13 +33,13 @@ class ExportCartRulesUsage extends Module
     private $html = '';
 
     protected $config_form = false;
-    //protected $support_url = 'https://addons.prestashop.com/contact-form.php?id_product=30813';
+    protected $support_url = 'https://addons.prestashop.com/fr/contactez-nous?id_product=45701';
 
     public function __construct()
     {
         $this->name = 'exportcartrulesusage';
         $this->tab = 'export';
-        $this->version = '1.0.1';
+        $this->version = '1.0.2';
         $this->author = 'Mathieu Thollet';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -75,11 +75,11 @@ class ExportCartRulesUsage extends Module
             $this->postProcess();
         }
         $this->context->smarty->assign('module_dir', $this->_path);
-        //$this->context->smarty->assign('support_url', $this->support_url);
+        $this->context->smarty->assign('support_url', $this->support_url);
         $output = $this->html .
             $this->context->smarty->fetch($this->local_path . 'views/templates/admin/export.tpl') .
-            $this->renderForm()
-            /*$this->context->smarty->fetch($this->local_path.'views/templates/admin/support.tpl')*/;
+            $this->renderForm() .
+            $this->context->smarty->fetch($this->local_path.'views/templates/admin/support.tpl');
         return $output;
     }
 
