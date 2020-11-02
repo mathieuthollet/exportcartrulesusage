@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2019 PrestaShop
+ * 2007-2020 PrestaShop
  *
  * NOTICE OF LICENSE
  *
@@ -19,7 +19,7 @@
  * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2019 PrestaShop SA
+ * @copyright 2007-2020 PrestaShop SA
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of PrestaShop SA
  */
@@ -39,7 +39,7 @@ class ExportCartRulesUsage extends Module
     {
         $this->name = 'exportcartrulesusage';
         $this->tab = 'export';
-        $this->version = '1.0.2';
+        $this->version = '1.0.3';
         $this->author = 'Mathieu Thollet';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -172,7 +172,7 @@ class ExportCartRulesUsage extends Module
                         'label' => $this->l('To'),
                         'name' => 'date_to',
                         'maxlength' => 10,
-                        'hint' => $this->l('Format: 2019-12-31 23:59:00 (inclusive).')
+                        'hint' => $this->l('Format: 2020-12-31 23:59:00 (inclusive).')
                     ),
                     array(
                         'type' => 'select',
