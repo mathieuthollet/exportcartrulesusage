@@ -39,7 +39,7 @@ class ExportCartRulesUsage extends Module
     {
         $this->name = 'exportcartrulesusage';
         $this->tab = 'export';
-        $this->version = '1.0.4';
+        $this->version = '1.0.5';
         $this->author = 'AWebVision';
         $this->need_instance = 0;
         $this->bootstrap = true;
